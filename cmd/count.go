@@ -10,7 +10,6 @@ import (
 	"github.com/ponyo877/dummy_data_generator/internal/repository"
 	"github.com/ponyo877/dummy_data_generator/internal/usecase/generator"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // countCmd represents the count command
@@ -23,11 +22,7 @@ var countCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("DBクライアントの作成に失敗しました: %v\n", err)
 		}
-		dbname, ok := viper.Get("database").(string)
-		if !ok {
-			log.Fatalf("DBクライアントの作成に失敗しました")
-		}
-		repository := repository.NewGenerateRepository(client, dbname)
+		repository := repository.NewGenerateRepository(client)
 		service := generator.NewService(repository)
 		if err := service.Count(); err != nil {
 			log.Fatalf("試験データ件数の取得に失敗しました: %v\n", err)

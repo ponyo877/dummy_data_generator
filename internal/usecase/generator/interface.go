@@ -3,11 +3,12 @@ package generator
 import "github.com/ponyo877/dummy_data_generator/internal/model"
 
 type Reader interface {
-	Count() (model.Tables, error)
+	ListTableName() (model.Tables, error)
+	Count(model.Tables) (model.Tables, error)
 }
 
 type Writer interface {
-	Generate()
+	Generate(model.Tables) error
 }
 
 type Repository interface {

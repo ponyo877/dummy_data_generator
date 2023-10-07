@@ -1,0 +1,51 @@
+tables:
+- tablename: table1
+  recordcount: 1000000
+  buffer: 1000
+  columns:
+  - name: id
+    type: number
+    rule: 
+      type: unique
+      min: 0
+  - name: name
+    type: varchar
+    rule:
+      type: const
+      value: xxxxx
+  - name: age
+    type: number
+    rule:
+      type: const
+      value: 30
+- tablename: table2
+  recordcount: 1000000
+  buffer: 1000
+  columns:
+  - name: id
+    type: number
+    rule:
+      type: unique
+      min: 0
+  - name: name
+    type: varchar
+    rule:
+      type: const
+      value: xxxxx
+  - name: age
+    type: number
+    rule: 
+      type: const
+      value: 30
+# CREATE TABLE table1 (
+#    id     INTEGER    NOT NULL,
+#    name   TEXT       NOT NULL,
+#    age    INTEGER    NOT NULL,
+#    PRIMARY KEY (id)
+# );
+# CREATE TABLE table2 (
+#    id     INTEGER    NOT NULL,
+#    name   TEXT       NOT NULL,
+#    age    INTEGER    NOT NULL,
+#    PRIMARY KEY (id)
+# );
