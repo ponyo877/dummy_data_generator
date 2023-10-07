@@ -9,13 +9,13 @@ import (
 )
 
 type DummyDataConfig struct {
+	Buffer      int          `mapstructure:"buffer"`
 	DummyTables []DummyTable `mapstructure:"tables"`
 }
 
 type DummyTable struct {
 	TableName   string        `mapstructure:"tablename"`
 	RecordCount int           `mapstructure:"recordcount"`
-	Buffer      int           `mapstructure:"buffer"`
 	Columns     []DummyColumn `mapstructure:"columns"`
 }
 
@@ -78,7 +78,7 @@ func Tables(config DummyDataConfig) (model.Tables, error) {
 			})
 		}
 		tables = append(tables, &model.Table{
-			Buffer:      dummyTable.Buffer,
+			Buffer:      config.Buffer,
 			Name:        dummyTable.TableName,
 			Columns:     columns,
 			RecordCount: dummyTable.RecordCount,

@@ -51,7 +51,7 @@ func (r GenerateRepository) Generate(tables model.Tables) error {
 		queryHeader := fmt.Sprintf("INSERT INTO %s VALUES ", table.Name)
 		bufferedQuerys := table.QueryRecords()
 		for _, bufferedQuery := range bufferedQuerys {
-			query := queryHeader + bufferedQuery + ";"
+			query := queryHeader + bufferedQuery
 			if err := r.db.Exec(query).Error; err != nil {
 				return err
 			}
