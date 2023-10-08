@@ -6,7 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"time"
 
+	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/text/message"
 )
@@ -34,7 +37,7 @@ type Rule struct {
 	Min      int
 	Max      int
 	Index    int
-	Patterns Pattern
+	Patterns []Pattern
 }
 
 type Pattern struct {
@@ -66,17 +69,63 @@ func (r Rule) rangeNumber() int {
 	return number
 }
 
+// patterValue get value for pattern
+func (r Rule) patterValue() string {
+	var petterns []string
+	var num_total int
+	for _, pattern := range r.Patterns {
+		for i := 0; i < pattern.Times; i++ {
+			petterns = append(petterns, pattern.Value)
+			num_total++
+		}
+	}
+	return petterns[r.Index%num_total]
+}
+
+// genUUID generate UUID
+func genUUID() string {
+	uuid, _ := uuid.NewRandom()
+	return uuid.String()
+}
+
+// genULID generate ULID
+func genULID() string {
+	return ulid.Make().String()
+}
+
 // queryValue get value for query
 func (c Column) queryValue() string {
 	var value string
 	switch c.Rule.Type {
 	case "const":
-		value = c.Rule.Value
-		if c.Type == "varchar" {
-			value = fmt.Sprintf(`'%s'`, value)
+		switch c.Type {
+		case "number":
+			value = c.Rule.Value
+		case "varchar", "timestamp":
+			value = fmt.Sprintf(`'%s'`, c.Rule.Value)
 		}
 	case "unique":
-		value = strconv.Itoa(c.Rule.rangeNumber())
+		switch c.Type {
+		case "number":
+			value = strconv.Itoa(c.Rule.rangeNumber())
+		case "varchar":
+			switch c.Rule.Format {
+			case "UUID":
+				value = genUUID()
+			case "ULID":
+				value = genULID()
+			}
+			value = fmt.Sprintf(`'%s'`, value)
+		case "timestamp":
+			if c.Rule.Value == "now" {
+				value = fmt.Sprintf(`'%s'`, time.Now().Format(time.RFC3339))
+			}
+			// log.Panicf("now_timestamp: %v", value)
+		}
+	case "pattern":
+		if c.Type == "varchar" {
+			value = fmt.Sprintf(`'%s'`, c.Rule.patterValue())
+		}
 	}
 	return value
 }

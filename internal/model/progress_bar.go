@@ -16,7 +16,7 @@ type Bar struct {
 	*mpb.Bar
 }
 
-func NewProgress() (*Progress, func() /* wait func for progress bar bug */) {
+func NewProgress() (*Progress, func() /* wait func for mpb bug */) {
 	return &Progress{
 		mpb.New(
 			mpb.WithOutput(color.Output),

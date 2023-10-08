@@ -56,37 +56,38 @@ tables:
     rule: 
       type: const
       value: 30
-# - tablename: table3
-#   recordcount: 1000000
-#   columns:
-#   - name: ulid
-#     type: varchar
-#     rule:
-#       type: unique
-#       format: ULID
-#   - name: uuid
-#     type: varchar
-#     rule:
-#       type: unique
-#       format: UUID
-#   - name: color
-#     type: varchar
-#     rule: 
-#       type: pattern
-#       - value: red
-#         times: 10
-#       - value: blue
-#         times: 5
-#       - value: green
-#         times: 1
-#       - value: yellow
-#   - name: updated_at
-#     type: timestamp
-#     rule: 
-#       type: unique
-#       value: "2024-01-01 00:00:00"
-#   - name: created_at
-#     type: timestamp
-#     rule: 
-#       type: unique
-#       value: now
+- tablename: table3
+  recordcount: 1000000
+  columns:
+  - name: ulid
+    type: varchar
+    rule:
+      type: unique
+      format: ULID
+  - name: uuid
+    type: varchar
+    rule:
+      type: unique
+      format: UUID
+  - name: color
+    type: varchar
+    rule:
+      type: pattern
+      patterns:
+      - value: red
+        times: 10
+      - value: blue
+        times: 5
+      - value: green
+        times: 1
+      - value: yellow
+  - name: updated_at
+    type: timestamp
+    rule:
+      type: const
+      value: '2024-01-01 00:00:00'
+  - name: created_at
+    type: timestamp
+    rule:
+      type: unique
+      value: now

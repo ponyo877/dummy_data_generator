@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/ponyo877/dummy_data_generator/internal/model"
@@ -25,12 +26,12 @@ type DummyColumn struct {
 }
 
 type DummyRule struct {
-	Type    string       `mapstructure:"type"`
-	Value   string       `mapstructure:"value"`
-	Min     int          `mapstructure:"min"`
-	Max     int          `mapstructure:"max"`
-	Format  string       `mapstructure:"format"`
-	Pattern DummyPattern `mapstructure:"pattern"`
+	Type     string         `mapstructure:"type"`
+	Value    string         `mapstructure:"value"`
+	Min      int            `mapstructure:"min"`
+	Max      int            `mapstructure:"max"`
+	Format   string         `mapstructure:"format"`
+	Patterns []DummyPattern `mapstructure:"patterns"`
 }
 
 type DummyPattern struct {
@@ -47,11 +48,11 @@ func LoadDummyDataConfig() (DummyDataConfig, error) {
 	if err := viper.Unmarshal(&config); err != nil {
 		return DummyDataConfig{}, err
 	}
-	// str, err := json.Marshal(config)
-	// if err != nil {
-	// 	return DummyDataConfig{}, err
-	// }
-	// fmt.Printf("config: %v\n", string(str))
+	str, err := json.Marshal(config)
+	if err != nil {
+		return DummyDataConfig{}, err
+	}
+	fmt.Printf("config: %v\n", string(str))
 	return config, nil
 }
 
@@ -62,19 +63,41 @@ func Tables(config DummyDataConfig) (model.Tables, error) {
 		var columns []model.Column
 		for _, dummyColumn := range dummyTable.Columns {
 			var rule model.Rule
+			errMsg := "Rule:%v is not supported for Type:%v"
 			switch dummyColumn.Rule.Type {
 			case "const":
-				if dummyColumn.Type != "number" && dummyColumn.Type != "varchar" {
-					return nil, fmt.Errorf("Rule:%vはType:%vはサポートしていません", dummyColumn.Rule.Type, dummyColumn.Type)
+				switch dummyColumn.Type {
+				case "number", "varchar", "timestamp":
+					rule.Value = dummyColumn.Rule.Value
+				default:
+					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
 				}
-				rule.Value = dummyColumn.Rule.Value
 			case "unique":
-				if dummyColumn.Type != "number" {
-					return nil, fmt.Errorf("Rule:%vはType:%vはサポートしていません", dummyColumn.Rule.Type, dummyColumn.Type)
+				switch dummyColumn.Type {
+				case "number":
+					rule.Min = dummyColumn.Rule.Min
+					rule.Max = dummyColumn.Rule.Max
+				case "varchar":
+					rule.Format = dummyColumn.Rule.Format
+				case "timestamp":
+					rule.Value = dummyColumn.Rule.Value
+				default:
+					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
 				}
-				rule = model.Rule{Min: dummyColumn.Rule.Min, Max: dummyColumn.Rule.Max}
+			case "pattern":
+				switch dummyColumn.Type {
+				case "varchar":
+					patterns := make([]model.Pattern, len(dummyColumn.Rule.Patterns))
+					for i, pattern := range dummyColumn.Rule.Patterns {
+						patterns[i] = model.Pattern{Value: pattern.Value, Times: max(pattern.Times, 1)}
+					}
+					rule.Patterns = patterns
+				default:
+					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
+				}
 			default:
-				return nil, fmt.Errorf("Rule:%vはサポートしていません", dummyColumn.Rule.Type)
+
+				return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, "ALL")
 			}
 			rule.Type = dummyColumn.Rule.Type
 			columns = append(columns, model.Column{
