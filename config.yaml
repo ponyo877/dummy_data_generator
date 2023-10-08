@@ -1,14 +1,22 @@
 # CREATE TABLE table1 (
-#    id     INTEGER    NOT NULL,
-#    name   TEXT       NOT NULL,
-#    age    INTEGER    NOT NULL,
+#    id   INTEGER NOT NULL,
+#    name TEXT    NOT NULL,
+#    age  INTEGER NOT NULL,
 #    PRIMARY KEY (id)
 # );
 # CREATE TABLE table2 (
-#    id     INTEGER    NOT NULL,
-#    name   TEXT       NOT NULL,
-#    age    INTEGER    NOT NULL,
+#    id   INTEGER NOT NULL,
+#    name TEXT    NOT NULL,
+#    age  INTEGER NOT NULL,
 #    PRIMARY KEY (id)
+# );
+# CREATE TABLE table3 (
+#    ulid       VARCHAR(26) NOT NULL,
+#    uuid       VARCHAR(36) NOT NULL,
+#    color      VARCHAR(7)  NOT NULL,
+#    updated_at TIMESTAMP   NOT NULL,
+#    created_at TIMESTAMP   NOT NULL,
+#    PRIMARY KEY (ulid)
 # );
 buffer: 1000
 tables:
@@ -48,3 +56,37 @@ tables:
     rule: 
       type: const
       value: 30
+# - tablename: table3
+#   recordcount: 1000000
+#   columns:
+#   - name: ulid
+#     type: varchar
+#     rule:
+#       type: unique
+#       format: ULID
+#   - name: uuid
+#     type: varchar
+#     rule:
+#       type: unique
+#       format: UUID
+#   - name: color
+#     type: varchar
+#     rule: 
+#       type: pattern
+#       - value: red
+#         times: 10
+#       - value: blue
+#         times: 5
+#       - value: green
+#         times: 1
+#       - value: yellow
+#   - name: updated_at
+#     type: timestamp
+#     rule: 
+#       type: unique
+#       value: "2024-01-01 00:00:00"
+#   - name: created_at
+#     type: timestamp
+#     rule: 
+#       type: unique
+#       value: now

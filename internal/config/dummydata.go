@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/ponyo877/dummy_data_generator/internal/model"
@@ -26,10 +25,17 @@ type DummyColumn struct {
 }
 
 type DummyRule struct {
-	Type  string `mapstructure:"type"`
+	Type    string       `mapstructure:"type"`
+	Value   string       `mapstructure:"value"`
+	Min     int          `mapstructure:"min"`
+	Max     int          `mapstructure:"max"`
+	Format  string       `mapstructure:"format"`
+	Pattern DummyPattern `mapstructure:"pattern"`
+}
+
+type DummyPattern struct {
 	Value string `mapstructure:"value"`
-	Min   int    `mapstructure:"min"`
-	Max   int    `mapstructure:"max"`
+	Times int    `mapstructure:"times"`
 }
 
 // LoadDummyDataConfig
@@ -41,15 +47,15 @@ func LoadDummyDataConfig() (DummyDataConfig, error) {
 	if err := viper.Unmarshal(&config); err != nil {
 		return DummyDataConfig{}, err
 	}
-	str, err := json.Marshal(config)
-	if err != nil {
-		return DummyDataConfig{}, err
-	}
-	fmt.Printf("config: %v\n", string(str))
+	// str, err := json.Marshal(config)
+	// if err != nil {
+	// 	return DummyDataConfig{}, err
+	// }
+	// fmt.Printf("config: %v\n", string(str))
 	return config, nil
 }
 
-// Table convert DummyDataConfig to model.Table
+// Tables convert DummyDataConfig to model.Table
 func Tables(config DummyDataConfig) (model.Tables, error) {
 	var tables model.Tables
 	for _, dummyTable := range config.DummyTables {

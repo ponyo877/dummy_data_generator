@@ -14,26 +14,42 @@ import (
 type Tables []*Table
 
 type Table struct {
-	Name        string
-	Columns     []Column
-	RecordCount int
-	Buffer      int
+	Name         string
+	Columns      []Column
+	RecordCount  int
+	Buffer       int
+	CurrentIndex int
 }
 
 type Column struct {
-	Index int
-	Name  string
-	Type  string
-	Rule  Rule
+	Name string
+	Type string
+	Rule Rule
 }
 
 type Rule struct {
-	Type  string
+	Type     string
+	Format   string
+	Value    string
+	Min      int
+	Max      int
+	Index    int
+	Patterns Pattern
+}
+
+type Pattern struct {
 	Value string
-	Min   int
-	Max   int
-	// Format interface{}
-	// Pattern interface{}
+	Times int
+}
+
+// setCurrentIndex set current index
+func (t *Table) setCurrentIndex(idx int) {
+	t.CurrentIndex = idx
+}
+
+// setIndex set index
+func (r *Rule) setIndex(idx int) {
+	r.Index = idx
 }
 
 // hasMax check has max
@@ -42,8 +58,8 @@ func (r Rule) hasMax() bool {
 }
 
 // rangeNumber get number in (c.Min, c.Max)
-func (r Rule) rangeNumber(idx int) int {
-	number := r.Min + idx
+func (r Rule) rangeNumber() int {
+	number := r.Min + r.Index
 	if r.hasMax() && number > r.Max {
 		number = r.Min
 	}
@@ -51,7 +67,7 @@ func (r Rule) rangeNumber(idx int) int {
 }
 
 // queryValue get value for query
-func (c Column) queryValue(idx int) string {
+func (c Column) queryValue() string {
 	var value string
 	switch c.Rule.Type {
 	case "const":
@@ -60,16 +76,17 @@ func (c Column) queryValue(idx int) string {
 			value = fmt.Sprintf(`'%s'`, value)
 		}
 	case "unique":
-		value = strconv.Itoa(c.Rule.rangeNumber(idx))
+		value = strconv.Itoa(c.Rule.rangeNumber())
 	}
 	return value
 }
 
 // queryRecord get record for query
-func (t Table) queryRecord(idx int) string {
+func (t Table) queryRecord() string {
 	var record []string
 	for _, column := range t.Columns {
-		record = append(record, column.queryValue(idx))
+		column.Rule.setIndex(t.CurrentIndex)
+		record = append(record, column.queryValue())
 	}
 	return fmt.Sprintf("(%s)", strings.Join(record, ","))
 }
@@ -79,7 +96,8 @@ func (t Table) QueryRecords() []string {
 	var bufferRecords []string
 	var records []string
 	for idx := 0; idx < t.RecordCount; idx++ {
-		records = append(records, t.queryRecord(idx))
+		t.setCurrentIndex(idx)
+		records = append(records, t.queryRecord())
 		if idx%t.Buffer == t.Buffer-1 {
 			bufferRecords = append(bufferRecords, strings.Join(records, ","))
 			records = []string{}
@@ -87,16 +105,6 @@ func (t Table) QueryRecords() []string {
 	}
 	return bufferRecords
 }
-
-// type Format[T string] struct {
-// 	Zeroppading bool
-// 	StrLength   int
-// }
-
-// type Pattern[T int] struct {
-// 	Value T
-// 	Ratio float64
-// }
 
 // StdoutOrg old print tables
 func (ts Tables) StdoutOrg() error {

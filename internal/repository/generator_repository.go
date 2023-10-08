@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ponyo877/dummy_data_generator/internal/model"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
@@ -47,15 +48,35 @@ func (r GenerateRepository) ListTableName() (model.Tables, error) {
 
 // Generate generate dummy data
 func (r GenerateRepository) Generate(tables model.Tables) error {
+	pbmap := make(map[string]model.Bar)
+	p, wait := model.NewProgress()
+	defer wait()
 	for _, table := range tables {
-		queryHeader := fmt.Sprintf("INSERT INTO %s VALUES ", table.Name)
-		bufferedQuerys := table.QueryRecords()
-		for _, bufferedQuery := range bufferedQuerys {
-			query := queryHeader + bufferedQuery
-			if err := r.db.Exec(query).Error; err != nil {
-				return err
-			}
-		}
+		pbmap[table.Name] = p.AddBar(int64(table.RecordCount), table.Name)
 	}
+	var eg errgroup.Group
+	for _, table := range tables {
+		// parallel insert per table
+		func(table *model.Table) {
+			eg.Go(func() error {
+				queryHeader := fmt.Sprintf("INSERT INTO %s VALUES ", table.Name)
+				bufferedQuerys := table.QueryRecords()
+				rest := table.RecordCount
+				for _, bufferedQuery := range bufferedQuerys {
+					query := queryHeader + bufferedQuery
+					if err := r.db.Exec(query).Error; err != nil {
+						return err
+					}
+					pbmap[table.Name].IncrInt64(int64(min(rest, table.Buffer)))
+					rest -= table.Buffer
+				}
+				return nil
+			})
+		}(table)
+	}
+	if err := eg.Wait(); err != nil {
+		return err
+	}
+
 	return nil
 }
