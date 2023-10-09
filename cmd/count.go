@@ -15,31 +15,21 @@ import (
 // countCmd represents the count command
 var countCmd = &cobra.Command{
 	Use:   "cnt",
-	Short: "試験データの件数を表示します",
-	Long:  "試験データの件数を表示します",
+	Short: "count target table data",
+	Long:  "count target table data",
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := database.PostgresClient()
 		if err != nil {
-			log.Fatalf("DBクライアントの作成に失敗しました: %v\n", err)
+			log.Fatalf("failed to create database client: %v\n", err)
 		}
 		repository := repository.NewGenerateRepository(client)
 		service := generator.NewService(repository)
 		if err := service.Count(); err != nil {
-			log.Fatalf("試験データ件数の取得に失敗しました: %v\n", err)
+			log.Fatalf("failed to count target table data: %v\n", err)
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(countCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// countCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// countCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{}
 
@@ -32,14 +30,15 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "config.yaml", "試験データの設定ファイルを指定します")
-	rootCmd.PersistentFlags().BoolP("help", "", false, "コマンドのヘルプを表示します")
-	rootCmd.PersistentFlags().StringP("host", "h", "localhost", "DBのホスト名を指定します")
-	rootCmd.PersistentFlags().StringP("dbuser", "u", "root", "DBのユーザ名を指定します")
-	rootCmd.PersistentFlags().StringP("port", "P", "5432", "DBのポート番号を指定します")
-	rootCmd.PersistentFlags().StringP("password", "p", "password", "DBのログインパスワードを指定します")
-	rootCmd.PersistentFlags().StringP("database", "d", "mydb", "データベース名を指定します")
+	rootCmd.PersistentFlags().StringSliceP("config", "c", []string{"config.yaml"}, "dummy data config file, multi case: -c \"cfg_*.yaml\" or -c cfg_1.yaml,cfg_2.yaml")
+	rootCmd.PersistentFlags().BoolP("help", "", false, "help for this command")
+	rootCmd.PersistentFlags().StringP("host", "h", "localhost", "database server host or socket directory")
+	rootCmd.PersistentFlags().StringP("dbuser", "u", "root", "database user name")
+	rootCmd.PersistentFlags().StringP("port", "P", "5432", "database server port")
+	rootCmd.PersistentFlags().StringP("password", "p", "password", "database password to use when connecting to serve")
+	rootCmd.PersistentFlags().StringP("database", "d", "mydb", "the database to use")
 
+	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	viper.BindPFlag("dbuser", rootCmd.PersistentFlags().Lookup("dbuser"))
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
@@ -51,23 +50,10 @@ func init() {
 	viper.SetDefault("port", "5432")
 	viper.SetDefault("password", "password")
 	viper.SetDefault("database", "mydb")
-
-	// rootCmd.MarkFlagRequired("config")
-
-	// rootCmd.AddCommand(addCmd)
-	// rootCmd.AddCommand(initCmd)
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	}
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.

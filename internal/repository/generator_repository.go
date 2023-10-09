@@ -19,9 +19,9 @@ func NewGenerateRepository(db *gorm.DB) *GenerateRepository {
 }
 
 // Count count current table data
-func (r GenerateRepository) Count(uncountedTables model.Tables) (model.Tables, error) {
+func (r GenerateRepository) Count(targetTables model.Tables) (model.Tables, error) {
 	var tables model.Tables
-	for _, table := range uncountedTables {
+	for _, table := range targetTables {
 		var count int64
 		r.db.Table(table.Name).Count(&count)
 		tables = append(tables, &model.Table{Name: table.Name, RecordCount: int(count)})
@@ -55,15 +55,16 @@ func (r GenerateRepository) Generate(tables model.Tables) error {
 		pbmap[table.Name] = p.AddBar(int64(table.RecordCount), table.Name)
 	}
 	var eg errgroup.Group
+	queryTemplate := "INSERT INTO %s (%s) VALUES %s"
 	for _, table := range tables {
 		// parallel insert per table
 		func(table *model.Table) {
 			eg.Go(func() error {
-				queryHeader := fmt.Sprintf("INSERT INTO %s VALUES ", table.Name)
-				bufferedQuerys := table.QueryRecords()
+				bufferedValuesList := table.BufferedValuesList()
 				rest := table.RecordCount
-				for _, bufferedQuery := range bufferedQuerys {
-					query := queryHeader + bufferedQuery
+				columns := table.ColumnNames()
+				for _, bufferedValues := range bufferedValuesList {
+					query := fmt.Sprintf(queryTemplate, table.Name, columns, bufferedValues)
 					if err := r.db.Exec(query).Error; err != nil {
 						return err
 					}

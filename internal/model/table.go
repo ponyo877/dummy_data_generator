@@ -50,6 +50,15 @@ func (t *Table) setCurrentIndex(idx int) {
 	t.CurrentIndex = idx
 }
 
+// ColumnNames get column names
+func (t *Table) ColumnNames() string {
+	var columnNames []string
+	for _, column := range t.Columns {
+		columnNames = append(columnNames, column.Name)
+	}
+	return strings.Join(columnNames, ",")
+}
+
 // setIndex set index
 func (r *Rule) setIndex(idx int) {
 	r.Index = idx
@@ -120,7 +129,6 @@ func (c Column) queryValue() string {
 			if c.Rule.Value == "now" {
 				value = fmt.Sprintf(`'%s'`, time.Now().Format(time.RFC3339))
 			}
-			// log.Panicf("now_timestamp: %v", value)
 		}
 	case "pattern":
 		if c.Type == "varchar" {
@@ -130,8 +138,8 @@ func (c Column) queryValue() string {
 	return value
 }
 
-// queryRecord get record for query
-func (t Table) queryRecord() string {
+// queryValues get record for query
+func (t Table) queryValues() string {
 	var record []string
 	for _, column := range t.Columns {
 		column.Rule.setIndex(t.CurrentIndex)
@@ -140,19 +148,19 @@ func (t Table) queryRecord() string {
 	return fmt.Sprintf("(%s)", strings.Join(record, ","))
 }
 
-// QueryRecords get records for query
-func (t Table) QueryRecords() []string {
-	var bufferRecords []string
+// BufferedValuesList get buffered records for query
+func (t Table) BufferedValuesList() []string {
+	var bufferValues []string
 	var records []string
 	for idx := 0; idx < t.RecordCount; idx++ {
 		t.setCurrentIndex(idx)
-		records = append(records, t.queryRecord())
+		records = append(records, t.queryValues())
 		if idx%t.Buffer == t.Buffer-1 {
-			bufferRecords = append(bufferRecords, strings.Join(records, ","))
+			bufferValues = append(bufferValues, strings.Join(records, ","))
 			records = []string{}
 		}
 	}
-	return bufferRecords
+	return bufferValues
 }
 
 // StdoutOrg old print tables

@@ -1,21 +1,19 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/ponyo877/dummy_data_generator/internal/model"
 	"github.com/spf13/viper"
 )
 
-type DummyDataConfig struct {
-	Buffer      int          `mapstructure:"buffer"`
-	DummyTables []DummyTable `mapstructure:"tables"`
-}
+type DummyTables []DummyTable
 
 type DummyTable struct {
 	TableName   string        `mapstructure:"tablename"`
 	RecordCount int           `mapstructure:"recordcount"`
+	Buffer      int           `mapstructure:"buffer"`
 	Columns     []DummyColumn `mapstructure:"columns"`
 }
 
@@ -40,26 +38,50 @@ type DummyPattern struct {
 }
 
 // LoadDummyDataConfig
-func LoadDummyDataConfig() (DummyDataConfig, error) {
-	if err := viper.ReadInConfig(); err != nil {
-		return DummyDataConfig{}, err
+func LoadDummyDataConfig() (DummyTables, error) {
+	dummyTables := DummyTables{}
+	configfileRegexs := viper.GetStringSlice("config")
+	for _, configfileRegex := range configfileRegexs {
+		configfiles, err := filepath.Glob(configfileRegex)
+		if err != nil {
+			return DummyTables{}, err
+		}
+		for _, configfile := range configfiles {
+			v := viper.New()
+			v.SetConfigFile(configfile)
+			if err := v.ReadInConfig(); err != nil {
+				return DummyTables{}, err
+			}
+			var dummyTable DummyTable
+			if err := v.Unmarshal(&dummyTable); err != nil {
+				return DummyTables{}, err
+			}
+			dummyTables = append(dummyTables, dummyTable)
+		}
 	}
-	var config DummyDataConfig
-	if err := viper.Unmarshal(&config); err != nil {
-		return DummyDataConfig{}, err
-	}
-	str, err := json.Marshal(config)
-	if err != nil {
-		return DummyDataConfig{}, err
-	}
-	fmt.Printf("config: %v\n", string(str))
-	return config, nil
+	// str, err := json.Marshal(dummyTables)
+	// if err != nil {
+	// 	return DummyTables{}, err
+	// }
+	// fmt.Printf("config: %v\n", string(str))
+	return dummyTables, nil
 }
 
-// Tables convert DummyDataConfig to model.Table
-func Tables(config DummyDataConfig) (model.Tables, error) {
+// Tables get tables
+func (t DummyTables) Tables() model.Tables {
 	var tables model.Tables
-	for _, dummyTable := range config.DummyTables {
+	for _, table := range t {
+		tables = append(tables, &model.Table{
+			Name: table.TableName,
+		})
+	}
+	return tables
+}
+
+// ToModels convert to models
+func (t DummyTables) ToModels() (model.Tables, error) {
+	var tables model.Tables
+	for _, dummyTable := range t {
 		var columns []model.Column
 		for _, dummyColumn := range dummyTable.Columns {
 			var rule model.Rule
@@ -96,7 +118,6 @@ func Tables(config DummyDataConfig) (model.Tables, error) {
 					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
 				}
 			default:
-
 				return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, "ALL")
 			}
 			rule.Type = dummyColumn.Rule.Type
@@ -107,7 +128,7 @@ func Tables(config DummyDataConfig) (model.Tables, error) {
 			})
 		}
 		tables = append(tables, &model.Table{
-			Buffer:      config.Buffer,
+			Buffer:      dummyTable.Buffer,
 			Name:        dummyTable.TableName,
 			Columns:     columns,
 			RecordCount: dummyTable.RecordCount,
