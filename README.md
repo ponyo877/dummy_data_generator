@@ -40,21 +40,18 @@ go install github.com/ponyo877/dummy_data_generator
 
 ##### Example
 ```yaml
-tablename: table1
+tablename: sample_tbl
 recordcount: 1000000
 buffer: 1000
 columns:
+# The 'id' column is a string in ULID format, ensuring all values are unique.
 - name: id
-  type: number
-  rule: 
-    type: unique
-    min: 0
-- name: name
   type: varchar
   rule:
-    type: const
-    value: ponyo877
-- name: color
+    type: unique
+    format: ULID
+# The 'sex' column will contain the strings "male", "female", and "NA" in a 3:2:1 ratio.
+- name: sex
   type: varchar
   rule:
     type: pattern
@@ -63,16 +60,14 @@ columns:
       times: 3
     - value: female
       times: 2
-- name: code
-  type: varchar
-  rule:
-    type: unique
-    format: UUID
+    - value: NA
+      times: 1
+# The 'created_at' column will have the fixed value "2024-01-01 00:00:00".
 - name: created_at
   type: timestamp
   rule:
-    type: unique
-    format: NOW
+    type: const
+    value: '2024-01-01 00:00:00'
 ```
 ## Sub Command
 | Sub Command           | Description                                                                                                  |
