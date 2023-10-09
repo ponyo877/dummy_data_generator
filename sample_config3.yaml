@@ -7,7 +7,7 @@
 #    PRIMARY KEY (ulid)
 # );
 tablename: table3
-recordcount: 1000000
+recordcount: 10000
 buffer: 1000
 columns:
 - name: color
