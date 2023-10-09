@@ -5,7 +5,7 @@
 #    PRIMARY KEY (id)
 # );
 tablename: table2
-recordcount: 1000000
+recordcount: 100000
 buffer: 1000
 columns:
 - name: id
@@ -21,5 +21,6 @@ columns:
 - name: age
   type: number
   rule: 
-    type: const
-    value: 30
+    type: pattern
+    min: 15
+    max: 30

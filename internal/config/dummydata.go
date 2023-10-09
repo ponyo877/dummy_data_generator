@@ -98,7 +98,7 @@ func (t DummyTables) ToModels() (model.Tables, error) {
 				switch dummyColumn.Type {
 				case "number":
 					rule.Min = dummyColumn.Rule.Min
-					rule.Max = dummyColumn.Rule.Max
+					rule.Max = 2147483647 // intMax
 				case "varchar", "timestamp":
 					rule.Format = dummyColumn.Rule.Format
 				default:
@@ -106,6 +106,9 @@ func (t DummyTables) ToModels() (model.Tables, error) {
 				}
 			case "pattern":
 				switch dummyColumn.Type {
+				case "number":
+					rule.Min = dummyColumn.Rule.Min
+					rule.Max = dummyColumn.Rule.Max
 				case "varchar":
 					patterns := make([]model.Pattern, len(dummyColumn.Rule.Patterns))
 					for i, pattern := range dummyColumn.Rule.Patterns {

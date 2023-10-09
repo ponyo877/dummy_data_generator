@@ -24,13 +24,19 @@ go install github.com/ponyo877/dummy_data_generator
 | columns[].name        | Name of the column.                                                        |
 | columns[].type        | Data type of the column (e.g., number, varchar, timestamp).                  |
 | columns[].rule        | Generation rule for the column.                                             |
-| columns[].rule.type        | Dummy data type (e.g., unique, const, pattern) |
+| columns[].rule.type        | Dummy rule type (e.g., unique, const, pattern) |
+| columns[].rule.format        | [type: unique only] Dummy data format (e.g., UUID(varchar), ULID(varchar), NOW(timestamp)) |
+| columns[].rule.value        | [type: const only] Dummy data const value |
+| columns[].rule.min        | start of sequential value |
+| columns[].rule.max        | [type: pattern only] end of sequential value |
+| columns[].patterns[].value        | [type: pattern only] repeated value |
+| columns[].patterns[].times        | [type: pattern only] value of how many times to repeat |
 
 #### Example Rules:
 
 - `type: unique`: Generates unique values. sequential number(default), current_timestamp(format: NOW), UUID and ULID is supported
 - `type: const`: Assigns a constant value.
-- `type: pattern`: Generates values based on specified patterns. If you specify [{value: A, times: 2}, {value: B, times: 1}], it will create repeated values like (A, A, B, A, A, B, ...) and so on.
+- `type: pattern`: Generates values based on specified patterns. If you specify [{value: A, times: 2}, {value: B, times: 1}], it will create repeated values like [A,A,B,A,A,B,...] and so on. And if you specify {Min: 1, Max: 5}, it will create repeated values like [1,2,3,4,5,1,2,3,...] and so on.
 
 ##### Example
 ```yaml

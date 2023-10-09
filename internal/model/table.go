@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/google/uuid"
@@ -64,17 +63,9 @@ func (r *Rule) setIndex(idx int) {
 	r.Index = idx
 }
 
-// hasMax check has max
-func (r Rule) hasMax() bool {
-	return r.Max != 0
-}
-
 // rangeNumber get number in (c.Min, c.Max)
 func (r Rule) rangeNumber() int {
-	number := r.Min + r.Index
-	if r.hasMax() && number > r.Max {
-		number = r.Min
-	}
+	number := (r.Min+r.Index)%(r.Max-r.Min+1) + r.Min
 	return number
 }
 
@@ -131,7 +122,10 @@ func (c Column) queryValue() string {
 			}
 		}
 	case "pattern":
-		if c.Type == "varchar" {
+		switch c.Type {
+		case "number":
+			value = strconv.Itoa(c.Rule.rangeNumber())
+		case "varchar":
 			value = fmt.Sprintf(`'%s'`, c.Rule.patterValue())
 		}
 	}
@@ -161,17 +155,6 @@ func (t Table) BufferedValuesList() []string {
 		}
 	}
 	return bufferValues
-}
-
-// StdoutOrg old print tables
-func (ts Tables) StdoutOrg() error {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.StripEscape|tabwriter.Debug)
-	p := message.NewPrinter(message.MatchLanguage("ja"))
-	fmt.Fprintln(w, "table\tcount")
-	for _, table := range ts {
-		fmt.Fprintln(w, table.Name+"\t"+p.Sprint(table.RecordCount))
-	}
-	return w.Flush()
 }
 
 // Stdout print tables

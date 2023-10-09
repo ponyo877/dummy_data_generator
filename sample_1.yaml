@@ -5,7 +5,7 @@
 #    PRIMARY KEY (id)
 # );
 tablename: table1
-recordcount: 1000000
+recordcount: 100000
 buffer: 1000
 columns:
 - name: id
