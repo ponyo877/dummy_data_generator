@@ -127,7 +127,7 @@ func (c Column) queryValue() string {
 			value = fmt.Sprintf(`'%s'`, value)
 		case "timestamp":
 			if c.Rule.Value == "now" {
-				value = fmt.Sprintf(`'%s'`, time.Now().Format(time.RFC3339))
+				value = fmt.Sprintf(`'%s'`, time.Now().Format(time.DateTime))
 			}
 		}
 	case "pattern":

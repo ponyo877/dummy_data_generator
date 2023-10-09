@@ -2,10 +2,11 @@
 #    ulid       VARCHAR(26) NOT NULL,
 #    uuid       VARCHAR(36) NOT NULL,
 #    color      VARCHAR(7)  NOT NULL,
-#    updated_at TIMESTAMP   NOT NULL,
-#    created_at TIMESTAMP   NOT NULL,
+#    updated_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 #    PRIMARY KEY (ulid)
 # );
+# MySQL: DEFAULT is required for TIMESTAMP column
 tablename: table3
 recordcount: 10000
 buffer: 1000

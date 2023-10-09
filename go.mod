@@ -11,9 +11,12 @@ require (
 	github.com/vbauerster/mpb/v8 v8.6.1
 	golang.org/x/sync v0.3.0
 	golang.org/x/text v0.13.0
+	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.4
 )
+
+require github.com/go-sql-driver/mysql v1.7.0 // indirect
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect

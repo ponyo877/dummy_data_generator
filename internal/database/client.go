@@ -5,32 +5,63 @@ import (
 	"log"
 
 	"github.com/ponyo877/dummy_data_generator/internal/config"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func PostgresClient() (*gorm.DB, error) {
+func NewDatabaseClient(dbEngine string) (*gorm.DB, error) {
 	dbConfig, err := config.LoadDBConfig()
 	if err != nil {
-		log.Fatalf("DB設定の読み込みに失敗しました: %v", err)
+		log.Fatalf("failed to load DB config: %v", err)
 	}
+	var gormDB *gorm.DB
+	switch dbEngine {
+	case "postgres":
+		gormDB, err = PostgresClient(dbConfig)
+	case "mysql":
+		gormDB, err = MySQLClient(dbConfig)
+	default:
+		log.Fatalf("%s is not supported", dbEngine)
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+	// db, err := gormDB.DB()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer db.Close()
+	return gormDB, nil
+}
 
+func PostgresClient(config config.DBConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", // sslmode=disable TimeZone=Asia/Shanghai
-		dbConfig.Host,
-		dbConfig.User,
-		dbConfig.Password,
-		dbConfig.Database,
-		dbConfig.Port,
+		config.Host,
+		config.User,
+		config.Password,
+		config.Database,
+		config.Port,
 	)
-
 	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
+	return gormDB, nil
+}
 
-	if _, err := gormDB.DB(); err != nil {
+func MySQLClient(config config.DBConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		config.User,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.Database,
+	)
+	gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
 		return nil, err
 	}
-	// defer db.Close()
 	return gormDB, nil
 }

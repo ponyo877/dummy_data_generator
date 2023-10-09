@@ -10,6 +10,7 @@ import (
 	"github.com/ponyo877/dummy_data_generator/internal/repository"
 	"github.com/ponyo877/dummy_data_generator/internal/usecase/generator"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // countCmd represents the count command
@@ -17,8 +18,9 @@ var countCmd = &cobra.Command{
 	Use:   "cnt",
 	Short: "count target table data",
 	Long:  "count target table data",
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := database.PostgresClient()
+	Run: func(_ *cobra.Command, _ []string) {
+		engine := viper.GetString("engine")
+		client, err := database.NewDatabaseClient(engine)
 		if err != nil {
 			log.Fatalf("failed to create database client: %v\n", err)
 		}

@@ -3,7 +3,6 @@ package generator
 import "github.com/ponyo877/dummy_data_generator/internal/model"
 
 type Reader interface {
-	ListTableName() (model.Tables, error)
 	Count(model.Tables) (model.Tables, error)
 }
 

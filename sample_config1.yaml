@@ -4,7 +4,6 @@
 #    age  INTEGER NOT NULL,
 #    PRIMARY KEY (id)
 # );
-# tables:
 tablename: table1
 recordcount: 1000000
 buffer: 1000

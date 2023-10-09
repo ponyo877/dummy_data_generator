@@ -29,23 +29,6 @@ func (r GenerateRepository) Count(targetTables model.Tables) (model.Tables, erro
 	return tables, nil
 }
 
-// ListTableName list table name
-func (r GenerateRepository) ListTableName() (model.Tables, error) {
-	var tables model.Tables
-	rows, err := r.db.Select("tablename").Table("pg_tables").Where(`schemaname = 'public'`).Rows()
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var tableName string
-		if err := rows.Scan(&tableName); err != nil {
-			return nil, err
-		}
-		tables = append(tables, &model.Table{Name: tableName})
-	}
-	return tables, nil
-}
-
 // Generate generate dummy data
 func (r GenerateRepository) Generate(tables model.Tables) error {
 	pbmap := make(map[string]model.Bar)
