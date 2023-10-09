@@ -80,15 +80,15 @@ func (r Rule) rangeNumber() int {
 
 // patterValue get value for pattern
 func (r Rule) patterValue() string {
-	var petterns []string
+	var patterns []string
 	var num_total int
 	for _, pattern := range r.Patterns {
 		for i := 0; i < pattern.Times; i++ {
-			petterns = append(petterns, pattern.Value)
+			patterns = append(patterns, pattern.Value)
 			num_total++
 		}
 	}
-	return petterns[r.Index%num_total]
+	return patterns[r.Index%num_total]
 }
 
 // genUUID generate UUID
@@ -126,7 +126,7 @@ func (c Column) queryValue() string {
 			}
 			value = fmt.Sprintf(`'%s'`, value)
 		case "timestamp":
-			if c.Rule.Value == "now" {
+			if c.Rule.Format == "NOW" {
 				value = fmt.Sprintf(`'%s'`, time.Now().Format(time.DateTime))
 			}
 		}

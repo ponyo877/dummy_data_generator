@@ -99,10 +99,8 @@ func (t DummyTables) ToModels() (model.Tables, error) {
 				case "number":
 					rule.Min = dummyColumn.Rule.Min
 					rule.Max = dummyColumn.Rule.Max
-				case "varchar":
+				case "varchar", "timestamp":
 					rule.Format = dummyColumn.Rule.Format
-				case "timestamp":
-					rule.Value = dummyColumn.Rule.Value
 				default:
 					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
 				}

@@ -16,7 +16,7 @@ func NewService(r Repository) *Service {
 	}
 }
 
-// Count count dammy data
+// Count count dummy data
 func (s Service) Count() error {
 	dummyDataConfig, err := config.LoadDummyDataConfig()
 	if err != nil {
@@ -29,7 +29,7 @@ func (s Service) Count() error {
 	return tables.Stdout()
 }
 
-// Generate generate dammy data
+// Generate generate dummy data
 func (s Service) Generate() error {
 	dummyDataConfig, err := config.LoadDummyDataConfig()
 	if err != nil {

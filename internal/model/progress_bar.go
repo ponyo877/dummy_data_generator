@@ -33,7 +33,7 @@ func (p *Progress) AddBar(total int64, taskName string) Bar {
 			decor.CountersNoUnit("%d / %d ", decor.WCSyncWidth),
 			decor.OnCompleteMeta(
 				decor.OnComplete(
-					decor.Meta(decor.Name("in progres", decor.WCSyncSpaceR), toMetaFunc(red)),
+					decor.Meta(decor.Name("in progress", decor.WCSyncSpaceR), toMetaFunc(red)),
 					"done!",
 				),
 				toMetaFunc(green),

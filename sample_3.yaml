@@ -42,4 +42,4 @@ columns:
   type: timestamp
   rule:
     type: unique
-    value: now
+    format: NOW
