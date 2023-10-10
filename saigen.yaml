@@ -1,0 +1,35 @@
+# CREATE TABLE saigen (
+#    id1    VARCHAR(26) NOT NULL,
+#    id2    INTEGER     NOT NULL,
+#    status INTEGER     NOT NULL,
+#    other  VARCHAR(5)  NOT NULL,
+#    PRIMARY KEY (id1, id2)
+# );
+tablename: saigen
+recordcount: 1000000
+buffer: 1000
+columns:
+- name: id1
+  type: varchar
+  rule: 
+    type: unique
+    format: ULID
+- name: id2
+  type: number
+  rule:
+    type: unique
+    min: 0
+- name: status
+  type: number
+  rule:
+    type: pattern
+    patterns:
+      - value: 0
+        times: 9
+      - value: 1
+        times: 1
+- name: other
+  type: varchar
+  rule:
+    type: const
+    value: xxxxx

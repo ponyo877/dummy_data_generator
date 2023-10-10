@@ -82,6 +82,11 @@ func (r Rule) patterValue() string {
 	return patterns[r.Index%num_total]
 }
 
+// hasPattern check if rule has pattern
+func (r Rule) hasPattern() bool {
+	return len(r.Patterns) > 0
+}
+
 // genUUID generate UUID
 func genUUID() string {
 	uuid, _ := uuid.NewRandom()
@@ -125,6 +130,9 @@ func (c Column) queryValue() string {
 		switch c.Type {
 		case "number":
 			value = strconv.Itoa(c.Rule.rangeNumber())
+			if c.Rule.hasPattern() {
+				value = c.Rule.patterValue()
+			}
 		case "varchar":
 			value = fmt.Sprintf(`'%s'`, c.Rule.patterValue())
 		}

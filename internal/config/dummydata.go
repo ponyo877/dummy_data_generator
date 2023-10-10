@@ -109,6 +109,7 @@ func (t DummyTables) ToModels() (model.Tables, error) {
 				case "number":
 					rule.Min = dummyColumn.Rule.Min
 					rule.Max = dummyColumn.Rule.Max
+					fallthrough
 				case "varchar":
 					patterns := make([]model.Pattern, len(dummyColumn.Rule.Patterns))
 					for i, pattern := range dummyColumn.Rule.Patterns {
