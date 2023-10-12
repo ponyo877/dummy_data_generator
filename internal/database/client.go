@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func NewDatabaseClient(dbEngine string) (*gorm.DB, error) {
@@ -44,7 +45,9 @@ func PostgresClient(config config.DBConfig) (*gorm.DB, error) {
 		config.Database,
 		config.Port,
 	)
-	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Error),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,9 @@ func MySQLClient(config config.DBConfig) (*gorm.DB, error) {
 		config.Port,
 		config.Database,
 	)
-	gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Error),
+	})
 	if err != nil {
 		return nil, err
 	}
