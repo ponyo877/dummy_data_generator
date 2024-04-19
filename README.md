@@ -24,11 +24,13 @@ go install github.com/ponyo877/dummy_data_generator
 | columns[].name        | Name of the column.                                                        |
 | columns[].type        | Data type of the column (e.g., number, varchar, timestamp).                  |
 | columns[].rule        | Generation rule for the column.                                             |
-| columns[].rule.type        | Dummy rule type (e.g., unique, const, pattern) |
+| columns[].rule.type        | Dummy rule type (e.g., unique, const, pattern, random) |
 | columns[].rule.format        | [type: unique only] Dummy data format (e.g., UUID(varchar), ULID(varchar), NOW(timestamp)) |
 | columns[].rule.value        | [type: const only] Dummy data const value |
 | columns[].rule.min        | start of sequential value |
 | columns[].rule.max        | [type: pattern only] end of sequential value |
+| columns[].rule.min_time   | [type: random (timestamp) only] minimum value for random timestamp |
+| columns[].rule.max_time   | [type: random (timestamp) only] maximum value for random timestamp |
 | columns[].patterns[].value        | [type: pattern only] repeated value |
 | columns[].patterns[].times        | [type: pattern only] value of how many times to repeat |
 
@@ -37,6 +39,7 @@ go install github.com/ponyo877/dummy_data_generator
 - `type: unique`: Generates unique values. sequential number(default), current_timestamp(format: NOW), UUID and ULID is supported
 - `type: const`: Assigns a constant value.
 - `type: pattern`: Generates values based on specified patterns. If you specify [{value: A, times: 2}, {value: B, times: 1}], it will create repeated values like [A,A,B,A,A,B,...] and so on. And if you specify {Min: 1, Max: 5}, it will create repeated values like [1,2,3,4,5,1,2,3,...] and so on.
+- `type: random`: Generates random values between two values; min_time and max_time. Only timestamp data type is available as of now. If you specify {min_time: '2024-01-01 00:00:00', max_time: '2024-03-31 23:59:59'}, it will yeild random timestamps between them like '2024-02-01 01:23:45' but not '2023-12-31 23:59:59' or '2024-04-01 00:00:00'.
 
 ##### Example
 ```yaml

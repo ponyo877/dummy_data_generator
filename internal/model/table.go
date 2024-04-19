@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -30,13 +31,15 @@ type Column struct {
 }
 
 type Rule struct {
-	Type     string
-	Format   string
-	Value    string
-	Min      int
-	Max      int
-	Index    int
-	Patterns []Pattern
+	Type        string
+	Format      string
+	Value       string
+	Min         int
+	Max         int
+	MinUnixTime int64
+	MaxUnixTime int64
+	Index       int
+	Patterns    []Pattern
 }
 
 type Pattern struct {
@@ -135,6 +138,15 @@ func (c Column) queryValue() string {
 			}
 		case "varchar":
 			value = fmt.Sprintf(`'%s'`, c.Rule.patterValue())
+		}
+	case "random":
+		switch c.Type {
+		case "timestamp":
+			mn := c.Rule.MinUnixTime
+			mx := c.Rule.MaxUnixTime
+			delta := mx - mn
+			sec := rand.Int63n(delta) + mn
+			value = fmt.Sprintf(`'%s'`, time.Unix(sec, 0).Format(time.RFC3339))
 		}
 	}
 	return value

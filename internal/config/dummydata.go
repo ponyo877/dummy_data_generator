@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/ponyo877/dummy_data_generator/internal/model"
 	"github.com/spf13/viper"
@@ -28,6 +29,8 @@ type DummyRule struct {
 	Value    string         `mapstructure:"value"`
 	Min      int            `mapstructure:"min"`
 	Max      int            `mapstructure:"max"`
+	MinTime  string         `mapstructure:"min_time"`
+	MaxTime  string         `mapstructure:"max_time"`
 	Format   string         `mapstructure:"format"`
 	Patterns []DummyPattern `mapstructure:"patterns"`
 }
@@ -35,6 +38,17 @@ type DummyRule struct {
 type DummyPattern struct {
 	Value string `mapstructure:"value"`
 	Times int    `mapstructure:"times"`
+}
+
+func ParseTimeStringToUnixTime(time_string string, default_unix_time int64) (int64, error) {
+	if time_string == "" {
+		// if expected parameter is not passed, fallback to default_unix_time
+		return default_unix_time, nil
+	} else if t, err := time.Parse("2006-01-02 15:04:05", time_string); err != nil {
+		return 0, err
+	} else {
+		return t.Unix(), nil
+	}
 }
 
 // LoadDummyDataConfig
@@ -116,6 +130,25 @@ func (t DummyTables) ToModels() (model.Tables, error) {
 						patterns[i] = model.Pattern{Value: pattern.Value, Times: max(pattern.Times, 1)}
 					}
 					rule.Patterns = patterns
+				default:
+					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
+				}
+			case "random":
+				switch dummyColumn.Type {
+				case "timestamp":
+					var err error
+					if rule.MinUnixTime, err = ParseTimeStringToUnixTime(
+						dummyColumn.Rule.MinTime,
+						time.Date(1970, 1, 0, 0, 0, 0, 0, time.UTC).Unix(),
+					); err != nil {
+						return nil, err
+					}
+					if rule.MaxUnixTime, err = ParseTimeStringToUnixTime(
+						dummyColumn.Rule.MaxTime,
+						time.Now().Unix(),
+					); err != nil {
+						return nil, err
+					}
 				default:
 					return nil, fmt.Errorf(errMsg, dummyColumn.Rule.Type, dummyColumn.Type)
 				}
