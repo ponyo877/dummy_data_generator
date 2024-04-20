@@ -157,7 +157,7 @@ func (t Table) BufferedValuesList() []string {
 	for idx := 0; idx < t.RecordCount; idx++ {
 		t.setCurrentIndex(idx)
 		records = append(records, t.queryValues())
-		if idx%t.Buffer == t.Buffer-1 {
+		if idx%t.Buffer == t.Buffer-1 || idx == t.RecordCount-1 {
 			bufferValues = append(bufferValues, strings.Join(records, ","))
 			records = []string{}
 		}
