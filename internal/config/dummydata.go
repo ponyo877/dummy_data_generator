@@ -44,11 +44,12 @@ func ParseTimeStringToUnixTime(time_string string, default_unix_time int64) (int
 	if time_string == "" {
 		// if expected parameter is not passed, fallback to default_unix_time
 		return default_unix_time, nil
-	} else if t, err := time.Parse("2006-01-02 15:04:05", time_string); err != nil {
-		return 0, err
-	} else {
-		return t.Unix(), nil
 	}
+	t, err := time.Parse("2006-01-02 15:04:05", time_string)
+	if err != nil {
+		return 0, err
+	}
+	return t.Unix(), nil
 }
 
 // LoadDummyDataConfig
